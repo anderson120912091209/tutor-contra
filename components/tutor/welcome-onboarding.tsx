@@ -25,7 +25,8 @@ interface WelcomeOnboardingProps {
 }
 
 export function WelcomeOnboarding({ onComplete }: WelcomeOnboardingProps) {
-  const [step, setStep] = useState<"welcome" | "form">("welcome");
+  const [step, setStep] = useState<"welcome" | "method" | "form">("welcome");
+  const [selectedMethod, setSelectedMethod] = useState<"auto" | "manual" | null>(null);
   const [selectedUniversity, setSelectedUniversity] = useState<{
     name: string;
     website?: string;
@@ -64,7 +65,7 @@ export function WelcomeOnboarding({ onComplete }: WelcomeOnboardingProps) {
     }
   };
 
-  const steps: Array<"welcome" | "form"> = ["welcome", "form"];
+  const steps: Array<"welcome" | "method" | "form"> = ["welcome", "method", "form"];
   const currentStepIndex = steps.indexOf(step);
   const canGoBack = currentStepIndex > 0;
   const canGoForward = currentStepIndex < steps.length - 1;
@@ -77,10 +78,27 @@ export function WelcomeOnboarding({ onComplete }: WelcomeOnboardingProps) {
   };
 
   const handleNext = () => {
+    if (step === "method" && !selectedMethod) {
+      return; // Don't proceed if method not selected
+    }
     if (canGoForward) {
       const nextStep = steps[currentStepIndex + 1];
       setStep(nextStep);
     }
+  };
+
+  const handleMethodSelect = (method: "auto" | "manual") => {
+    setSelectedMethod(method);
+    // Auto proceed to next step after selection
+    setTimeout(() => {
+      if (method === "manual") {
+        setStep("form");
+      } else {
+        // For auto method, you might want to show a different flow
+        // For now, also go to form
+        setStep("form");
+      }
+    }, 300);
   };
 
   return (
@@ -206,6 +224,151 @@ export function WelcomeOnboarding({ onComplete }: WelcomeOnboardingProps) {
               </Button>
             </motion.div>
           </motion.div>
+        ) : step === "method" ? (
+          <motion.div
+            key="method"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="w-full max-w-4xl mx-auto px-6"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.3 }}
+              className="bg-white rounded-lg border border-gray-200 p-8"
+            >
+              {/* Progress Indicator */}
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium" style={{ color: "#373737" }}>
+                    步驟 2 / 3
+                  </span>
+                  <span className="text-sm" style={{ color: "#737373" }}>
+                    選擇方式
+                  </span>
+                </div>
+                <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: "33.33%" }}
+                    animate={{ width: "66.66%" }}
+                    transition={{ duration: 0.4 }}
+                    className="h-full bg-[#373737]"
+                  />
+                </div>
+              </div>
+
+              {/* Title */}
+              <div className="mb-8 text-center">
+                <h2 className="text-2xl font-semibold mb-2" style={{ color: "#373737" }}>
+                  選擇建立檔案的方式
+                </h2>
+                <p className="text-sm" style={{ color: "#737373" }}>
+                  您可以選擇自動整合或手動輸入
+                </p>
+              </div>
+
+              {/* Method Selection */}
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Auto Integration Option */}
+                <button
+                  onClick={() => handleMethodSelect("auto")}
+                  className={`group relative p-8 rounded-xl border-2 transition-all text-left ${
+                    selectedMethod === "auto"
+                      ? "border-[#373737] bg-gray-50"
+                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  <div className="flex flex-col items-center text-center space-y-4">
+                    <div className="w-16 h-16 flex items-center justify-center">
+                      <Image
+                        src="/integration.svg"
+                        alt="自動整合"
+                        width={64}
+                        height={64}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2" style={{ color: "#373737" }}>
+                        自動整合
+                      </h3>
+                      <p className="text-sm leading-relaxed" style={{ color: "#737373" }}>
+                        上傳履歷、複製貼上文字或整合 LinkedIn，系統將自動提取您的資訊
+                      </p>
+                    </div>
+                  </div>
+                  {selectedMethod === "auto" && (
+                    <div className="absolute top-4 right-4">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        style={{ color: "#373737" }}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                </button>
+
+                {/* Manual Option */}
+                <button
+                  onClick={() => handleMethodSelect("manual")}
+                  className={`group relative p-8 rounded-xl border-2 transition-all text-left ${
+                    selectedMethod === "manual"
+                      ? "border-[#373737] bg-gray-50"
+                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  <div className="flex flex-col items-center text-center space-y-4">
+                    <div className="w-16 h-16 flex items-center justify-center">
+                      <Image
+                        src="/manual.svg"
+                        alt="手動輸入"
+                        width={64}
+                        height={64}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2" style={{ color: "#373737" }}>
+                        手動輸入
+                      </h3>
+                      <p className="text-sm leading-relaxed" style={{ color: "#737373" }}>
+                        逐步填寫您的個人資料和教學經驗 
+                      </p>
+                    </div>
+                  </div>
+                  {selectedMethod === "manual" && (
+                    <div className="absolute top-4 right-4">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        style={{ color: "#373737" }}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
         ) : (
           <motion.div
             key="form"
@@ -225,7 +388,7 @@ export function WelcomeOnboarding({ onComplete }: WelcomeOnboardingProps) {
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-medium" style={{ color: "#373737" }}>
-                    步驟 1 / 3
+                    步驟 3 / 3
                   </span>
                   <span className="text-sm" style={{ color: "#737373" }}>
                     基本資料
@@ -233,8 +396,8 @@ export function WelcomeOnboarding({ onComplete }: WelcomeOnboardingProps) {
                 </div>
                 <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
                   <motion.div
-                    initial={{ width: "0%" }}
-                    animate={{ width: "33.33%" }}
+                    initial={{ width: "66.66%" }}
+                    animate={{ width: "100%" }}
                     transition={{ duration: 0.4 }}
                     className="h-full bg-[#373737]"
                   />
