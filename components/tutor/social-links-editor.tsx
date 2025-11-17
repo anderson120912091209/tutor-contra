@@ -66,13 +66,13 @@ export function SocialLinksEditor({ socialLinks, onChange }: SocialLinksEditorPr
 
   return (
     <div className="space-y-6">
-      <div className="text-sm text-muted-foreground">
+      <div className="text-sm" style={{ color: "#737373" }}>
         新增您的社交媒體連結，讓家長更了解您
       </div>
 
       {SOCIAL_PLATFORMS.map((platform) => (
-        <div key={platform.name} className="space-y-2">
-          <Label htmlFor={platform.name} className="flex items-center gap-2">
+        <div key={platform.name} className="space-y-3">
+          <Label htmlFor={platform.name} className="flex items-center gap-2 text-sm font-medium" style={{ color: "#373737" }}>
             <span className={platform.color}>{platform.icon}</span>
             <span>{platform.label}</span>
           </Label>
@@ -82,6 +82,8 @@ export function SocialLinksEditor({ socialLinks, onChange }: SocialLinksEditorPr
             value={socialLinks[platform.name as keyof SocialLinks] || ""}
             onChange={(e) => handleChange(platform.name, e.target.value)}
             placeholder={platform.placeholder}
+            className="w-full text-base py-4 px-4 bg-gray-50 border-0 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#373737]/20 transition-all placeholder:text-gray-400"
+            style={{ color: "#373737" }}
           />
         </div>
       ))}

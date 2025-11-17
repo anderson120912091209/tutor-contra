@@ -43,14 +43,14 @@ export function CalendarIntegrations({
 
   return (
     <div className="space-y-4">
-      <div className="text-sm text-muted-foreground mb-4">
+      <div className="text-sm mb-6" style={{ color: "#737373" }}>
         連結您的日曆，當學生預約課程時，自動同步到您的日曆
       </div>
 
       {/* Google Calendar */}
-      <div className="border rounded-lg p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-white rounded-lg border flex items-center justify-center">
+      <div className="rounded-xl p-5 bg-white border border-gray-100 flex items-center justify-between transition-all hover:shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-white rounded-xl border border-gray-100 flex items-center justify-center shadow-sm">
             <svg className="w-8 h-8" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
@@ -71,10 +71,12 @@ export function CalendarIntegrations({
             </svg>
           </div>
           <div>
-            <div className="font-semibold">Google Calendar</div>
-            <div className="text-sm text-muted-foreground">
+            <div className="font-medium text-sm mb-0.5" style={{ color: "#373737" }}>
+              Google Calendar
+            </div>
+            <div className="text-xs" style={{ color: "#737373" }}>
               {googleCalendarEnabled ? (
-                <span className="text-green-600">✓ 已連結</span>
+                <span style={{ color: "#10b981" }}>✓ 已連結</span>
               ) : (
                 "未連結"
               )}
@@ -83,29 +85,37 @@ export function CalendarIntegrations({
         </div>
 
         {googleCalendarEnabled ? (
-          <Button
+          <button
             type="button"
-            variant="outline"
             onClick={onGoogleDisconnect}
-            className="text-red-600"
+            className="px-4 py-2 text-xs font-medium rounded-lg transition-all hover:opacity-70"
+            style={{ 
+              color: "#dc2626",
+              backgroundColor: "#fee2e2"
+            }}
           >
             中斷連結
-          </Button>
+          </button>
         ) : (
-          <Button
+          <button
             type="button"
             onClick={handleGoogleConnect}
             disabled={connecting === "google"}
+            className="px-4 py-2 text-xs font-medium rounded-lg transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ 
+              color: connecting === "google" ? "#d1d5db" : "white",
+              backgroundColor: connecting === "google" ? "#f3f4f6" : "#373737"
+            }}
           >
             {connecting === "google" ? "連結中..." : "連結"}
-          </Button>
+          </button>
         )}
       </div>
 
       {/* Notion Calendar */}
-      <div className="border rounded-lg p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-white rounded-lg border flex items-center justify-center">
+      <div className="rounded-xl p-5 bg-white border border-gray-100 flex items-center justify-between transition-all hover:shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-white rounded-xl border border-gray-100 flex items-center justify-center shadow-sm">
             <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none">
               <path
                 d="M4 4h16v16H4V4z"
@@ -122,10 +132,12 @@ export function CalendarIntegrations({
             </svg>
           </div>
           <div>
-            <div className="font-semibold">Notion Calendar</div>
-            <div className="text-sm text-muted-foreground">
+            <div className="font-medium text-sm mb-0.5" style={{ color: "#373737" }}>
+              Notion Calendar
+            </div>
+            <div className="text-xs" style={{ color: "#737373" }}>
               {notionCalendarEnabled ? (
-                <span className="text-green-600">✓ 已連結</span>
+                <span style={{ color: "#10b981" }}>✓ 已連結</span>
               ) : (
                 "未連結"
               )}
@@ -134,32 +146,42 @@ export function CalendarIntegrations({
         </div>
 
         {notionCalendarEnabled ? (
-          <Button
+          <button
             type="button"
-            variant="outline"
             onClick={onNotionDisconnect}
-            className="text-red-600"
+            className="px-4 py-2 text-xs font-medium rounded-lg transition-all hover:opacity-70"
+            style={{ 
+              color: "#dc2626",
+              backgroundColor: "#fee2e2"
+            }}
           >
             中斷連結
-          </Button>
+          </button>
         ) : (
-          <Button
+          <button
             type="button"
             onClick={handleNotionConnect}
             disabled={connecting === "notion"}
+            className="px-4 py-2 text-xs font-medium rounded-lg transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ 
+              color: connecting === "notion" ? "#d1d5db" : "white",
+              backgroundColor: connecting === "notion" ? "#f3f4f6" : "#373737"
+            }}
           >
             {connecting === "notion" ? "連結中..." : "連結"}
-          </Button>
+          </button>
         )}
       </div>
 
       {/* Benefits Info */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex items-start gap-2">
+      <div className="rounded-xl p-5 bg-gray-50 border border-gray-100">
+        <div className="flex items-start gap-3">
           <span className="text-lg">💡</span>
-          <div className="flex-1 text-sm">
-            <div className="font-medium text-blue-900 mb-1">自動同步好處</div>
-            <ul className="text-blue-700 space-y-1">
+          <div className="flex-1">
+            <div className="font-medium text-sm mb-2" style={{ color: "#373737" }}>
+              自動同步好處
+            </div>
+            <ul className="text-xs space-y-1.5" style={{ color: "#737373" }}>
               <li>• 學生預約時自動在日曆建立事件</li>
               <li>• 避免時間衝突和重複預約</li>
               <li>• 提前收到提醒通知</li>

@@ -45,13 +45,17 @@ export function EducationEditor({ education, onChange }: EducationEditorProps) {
           onCancel={() => setIsAdding(false)}
         />
       ) : (
-        <Button
-          variant="outline"
+        <button
+          type="button"
           onClick={() => setIsAdding(true)}
-          className="w-full"
+          className="w-full px-4 py-3 text-sm font-medium rounded-xl transition-all hover:opacity-70"
+          style={{ 
+            color: "#373737",
+            backgroundColor: "#f3f4f6"
+          }}
         >
           + 新增學歷
-        </Button>
+        </button>
       )}
     </div>
   );
@@ -82,27 +86,37 @@ function EducationItem({
   }
 
   return (
-    <div className="p-4 border rounded-lg hover:bg-accent transition-colors group">
+    <div className="p-4 rounded-xl bg-gray-50 hover:bg-gray-100/50 transition-colors group border border-gray-100">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <div className="font-semibold">{education.university}</div>
-          <div className="text-sm text-muted-foreground">
+          <div className="font-medium text-sm mb-1" style={{ color: "#373737" }}>
+            {education.university}
+          </div>
+          <div className="text-xs mb-1" style={{ color: "#737373" }}>
             {education.degree} • {education.major}
           </div>
-          <div className="text-xs text-muted-foreground mt-1">
+          <div className="text-xs" style={{ color: "#737373" }}>
             {education.startYear} - {education.endYear || "現在"}
           </div>
         </div>
         <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={() => setIsEditing(true)}
-            className="text-sm text-primary hover:underline"
+            className="text-xs px-2 py-1 rounded-lg transition-all hover:opacity-70"
+            style={{ 
+              color: "#737373",
+              backgroundColor: "#f3f4f6"
+            }}
           >
             編輯
           </button>
           <button
             onClick={onRemove}
-            className="text-sm text-destructive hover:underline"
+            className="text-xs px-2 py-1 rounded-lg transition-all hover:opacity-70"
+            style={{ 
+              color: "#737373",
+              backgroundColor: "#f3f4f6"
+            }}
           >
             刪除
           </button>
@@ -150,24 +164,29 @@ function EducationForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 border rounded-lg bg-accent/50 space-y-3">
-      <UniversityAutocompleteGlobal
-        value={university}
-        onSelect={(uni) => {
-          setUniversity(uni.name);
-          setUniversityId(uni.universityId);
-          setWebsite(uni.website);
-          setCountry(uni.country || "");
-        }}
-      />
+    <form onSubmit={handleSubmit} className="p-6 rounded-xl bg-gray-50 border border-gray-100 space-y-6">
+      <div className="bg-white rounded-xl p-4">
+        <UniversityAutocompleteGlobal
+          value={university}
+          onSelect={(uni) => {
+            setUniversity(uni.name);
+            setUniversityId(uni.universityId);
+            setWebsite(uni.website);
+            setCountry(uni.country || "");
+          }}
+        />
+      </div>
 
-      <div className="grid md:grid-cols-2 gap-3">
-        <div>
-          <label className="text-sm font-medium">學位 *</label>
+      <div className="grid md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium block" style={{ color: "#373737" }}>
+            學位 *
+          </label>
           <select
             value={degree}
             onChange={(e) => setDegree(e.target.value)}
-            className="w-full p-2 border rounded-md mt-1"
+            className="w-full text-base py-4 px-4 bg-gray-50 border-0 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#373737]/20 transition-all"
+            style={{ color: "#373737" }}
             required
           >
             <option value="">選擇學位</option>
@@ -176,40 +195,49 @@ function EducationForm({
             <option value="博士">博士</option>
           </select>
         </div>
-        <div>
-          <label className="text-sm font-medium">主修科系 *</label>
+        <div className="space-y-2">
+          <label className="text-sm font-medium block" style={{ color: "#373737" }}>
+            主修科系 *
+          </label>
           <input
             type="text"
             value={major}
             onChange={(e) => setMajor(e.target.value)}
-            className="w-full p-2 border rounded-md mt-1"
+            className="w-full text-base py-4 px-4 bg-gray-50 border-0 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#373737]/20 transition-all placeholder:text-gray-400"
+            style={{ color: "#373737" }}
             placeholder="例：資訊工程學系"
             required
           />
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-3">
-        <div>
-          <label className="text-sm font-medium">開始年份 *</label>
+      <div className="grid md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium block" style={{ color: "#373737" }}>
+            開始年份 *
+          </label>
           <input
             type="number"
             value={startYear}
             onChange={(e) => setStartYear(e.target.value)}
-            className="w-full p-2 border rounded-md mt-1"
+            className="w-full text-base py-4 px-4 bg-gray-50 border-0 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#373737]/20 transition-all placeholder:text-gray-400"
+            style={{ color: "#373737" }}
             placeholder="2015"
             min="1950"
             max={new Date().getFullYear()}
             required
           />
         </div>
-        <div>
-          <label className="text-sm font-medium">結束年份（可留空表示在學）</label>
+        <div className="space-y-2">
+          <label className="text-sm font-medium block" style={{ color: "#373737" }}>
+            結束年份（可留空表示在學）
+          </label>
           <input
             type="number"
             value={endYear}
             onChange={(e) => setEndYear(e.target.value)}
-            className="w-full p-2 border rounded-md mt-1"
+            className="w-full text-base py-4 px-4 bg-gray-50 border-0 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#373737]/20 transition-all placeholder:text-gray-400"
+            style={{ color: "#373737" }}
             placeholder="2019"
             min="1950"
             max={new Date().getFullYear() + 10}
@@ -217,13 +245,28 @@ function EducationForm({
         </div>
       </div>
 
-      <div className="flex gap-2 pt-2">
-        <Button type="submit" size="sm">
+      <div className="flex gap-3 pt-2">
+        <button
+          type="submit"
+          className="flex-1 px-4 py-3 text-sm font-medium rounded-xl transition-all shadow-sm hover:shadow-md"
+          style={{ 
+            color: "white",
+            backgroundColor: "#373737"
+          }}
+        >
           {initialData ? "更新" : "新增"}
-        </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex-1 px-4 py-3 text-sm font-medium rounded-xl transition-all hover:opacity-70"
+          style={{ 
+            color: "#737373",
+            backgroundColor: "#f3f4f6"
+          }}
+        >
           取消
-        </Button>
+        </button>
       </div>
     </form>
   );

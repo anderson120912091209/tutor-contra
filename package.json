@@ -26,6 +26,7 @@
     "react": "^19.0.0-rc.1",
     "react-dom": "^19.0.0-rc.1",
     "react-hook-form": "^7.66.0",
+    "resend": "^6.4.2",
     "tailwind-merge": "^2.5.4",
     "zod": "^3.23.8"
   },

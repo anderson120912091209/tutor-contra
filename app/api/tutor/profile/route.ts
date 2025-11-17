@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { getTutorProfile } from "@/lib/db/tutor";
 
 const educationSchema = z.object({
   university: z.string(),
@@ -33,6 +34,9 @@ const updateProfileSchema = z.object({
   location: z.string().nullable().optional(),
   teaches_online: z.boolean().optional(),
   years_experience: z.number().nullable().optional(),
+  high_school: z.string().nullable().optional(),
+  high_school_system: z.enum(["IB", "AP", "學測", "高職", "A-Levels", "其他"]).nullable().optional(),
+  high_school_system_other: z.string().nullable().optional(),
   education: z.array(educationSchema).optional(),
   avatar_photo_url: z.string().nullable().optional(),
   gallery_photos: z.array(galleryPhotoSchema).optional(),
@@ -43,6 +47,25 @@ const updateProfileSchema = z.object({
     .regex(/^[a-z0-9-]+$/, "Slug 只能包含小寫字母、數字和連字號")
     .optional(),
 });
+
+export async function GET(request: Request) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const profile = await getTutorProfile(user.id);
+  
+  if (!profile) {
+    return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+  }
+
+  return NextResponse.json(profile);
+}
 
 export async function PUT(request: Request) {
   const supabase = await createClient();
@@ -74,6 +97,9 @@ export async function PUT(request: Request) {
         location: validatedData.location ?? null,
         teaches_online: validatedData.teaches_online ?? false,
         years_experience: validatedData.years_experience ?? null,
+        high_school: validatedData.high_school ?? null,
+        high_school_system: validatedData.high_school_system ?? null,
+        high_school_system_other: validatedData.high_school_system_other ?? null,
         education: validatedData.education || [],
         avatar_photo_url: validatedData.avatar_photo_url ?? null,
         gallery_photos: validatedData.gallery_photos || [],

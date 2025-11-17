@@ -97,55 +97,54 @@ export function UniversityAutocompleteGlobal({
   const hasResults = localResults.length > 0 || globalResults.length > 0;
 
   return (
-    <div ref={wrapperRef} className="relative space-y-2">
-      <div>
-        <label className="text-sm font-medium">大學 *</label>
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => query && setIsOpen(true)}
-          className="w-full p-2 border rounded-md mt-1"
-          placeholder="輸入大學名稱（支援全球大學）..."
-          required
-        />
-      </div>
-
-      {/* Country Filter */}
-      <div className="flex gap-1 flex-wrap">
-        <button
-          type="button"
-          onClick={() => setSelectedCountry("")}
-          className={`px-2 py-1 text-xs rounded-full transition-colors ${
-            selectedCountry === ""
-              ? "bg-primary text-primary-foreground"
-              : "bg-gray-100 hover:bg-gray-200"
-          }`}
-        >
-          全部
-        </button>
-        {POPULAR_COUNTRIES.slice(0, 6).map((country) => (
-          <button
-            key={country.code}
-            type="button"
-            onClick={() => setSelectedCountry(country.nameEn)}
-            className={`px-2 py-1 text-xs rounded-full transition-colors ${
-              selectedCountry === country.nameEn
-                ? "bg-primary text-primary-foreground"
-                : "bg-gray-100 hover:bg-gray-200"
-            }`}
-          >
-            {country.name}
-          </button>
-        ))}
-      </div>
+    <div ref={wrapperRef} className="relative w-full">
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onFocus={() => query && setIsOpen(true)}
+        className="w-full py-4 px-4 bg-transparent border-0 focus:outline-none text-base placeholder:text-gray-400"
+        style={{ color: "#373737" }}
+        placeholder="輸入大學名稱（支援全球大學）..."
+        required
+      />
 
       {isOpen && (query.length > 0) && (
-        <div className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg max-h-96 overflow-auto">
+        <div className="absolute z-50 w-full mt-2 bg-white border-0 rounded-xl shadow-xl max-h-96 overflow-auto ring-1 ring-gray-200/50">
+          {/* Country Filter */}
+          <div className="sticky top-0 bg-white px-4 py-3 border-b border-gray-100 flex gap-2 flex-wrap z-10">
+            <button
+              type="button"
+              onClick={() => setSelectedCountry("")}
+              className={`px-3 py-1.5 text-xs rounded-lg transition-all ${
+                selectedCountry === ""
+                  ? "bg-[#373737] text-white shadow-sm"
+                  : "bg-gray-100 hover:bg-gray-200 text-[#373737]"
+              }`}
+              style={{ color: selectedCountry === "" ? "white" : "#373737" }}
+            >
+              全部
+            </button>
+            {POPULAR_COUNTRIES.slice(0, 6).map((country) => (
+              <button
+                key={country.code}
+                type="button"
+                onClick={() => setSelectedCountry(country.nameEn)}
+                className={`px-3 py-1.5 text-xs rounded-lg transition-all ${
+                  selectedCountry === country.nameEn
+                    ? "bg-[#373737] text-white shadow-sm"
+                    : "bg-gray-100 hover:bg-gray-200 text-[#373737]"
+                }`}
+                style={{ color: selectedCountry === country.nameEn ? "white" : "#373737" }}
+              >
+                {country.name}
+              </button>
+            ))}
+          </div>
           {/* Local (Taiwan) Results */}
           {localResults.length > 0 && (
             <div>
-              <div className="px-4 py-2 bg-gray-50 border-b text-xs font-semibold text-gray-600">
+              <div className="px-4 py-2.5 bg-gray-50/50 border-b border-gray-100 text-xs font-medium" style={{ color: "#737373" }}>
                 🇹🇼 台灣大學
               </div>
               {localResults.map((uni) => (
@@ -153,17 +152,16 @@ export function UniversityAutocompleteGlobal({
                   key={uni.id}
                   type="button"
                   onClick={() => handleSelectLocal(uni)}
-                  className="w-full px-4 py-3 text-left hover:bg-accent transition-colors flex items-center gap-3 border-b"
+                  className="w-full px-4 py-3 text-left hover:bg-gray-50/80 transition-colors flex items-center gap-3 border-b border-gray-50 last:border-b-0"
                 >
-                  <span className="text-2xl">{uni.logo}</span>
+                  <span className="text-xl">{uni.logo}</span>
                   <div className="flex-1">
-                    <div className="font-medium">{uni.name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {uni.location} • 排名 #{uni.ranking}
+                    <div className="font-medium text-sm" style={{ color: "#373737" }}>
+                      {uni.name}
                     </div>
-                  </div>
-                  <div className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
-                    推薦
+                    <div className="text-xs mt-0.5" style={{ color: "#737373" }}>
+                      {uni.location}
+                    </div>
                   </div>
                 </button>
               ))}
@@ -173,7 +171,7 @@ export function UniversityAutocompleteGlobal({
           {/* Global Results */}
           {globalResults.length > 0 && (
             <div>
-              <div className="px-4 py-2 bg-gray-50 border-b text-xs font-semibold text-gray-600">
+              <div className="px-4 py-2.5 bg-gray-50/50 border-b border-gray-100 text-xs font-medium" style={{ color: "#737373" }}>
                 🌍 全球大學
               </div>
               {globalResults.map((uni) => (
@@ -181,12 +179,14 @@ export function UniversityAutocompleteGlobal({
                   key={uni.id}
                   type="button"
                   onClick={() => handleSelectGlobal(uni)}
-                  className="w-full px-4 py-3 text-left hover:bg-accent transition-colors flex items-center gap-3 border-b"
+                  className="w-full px-4 py-3 text-left hover:bg-gray-50/80 transition-colors flex items-center gap-3 border-b border-gray-50 last:border-b-0"
                 >
-                  <span className="text-2xl">{uni.logo}</span>
+                  <span className="text-xl">{uni.logo || "🏫"}</span>
                   <div className="flex-1">
-                    <div className="font-medium">{uni.name}</div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="font-medium text-sm" style={{ color: "#373737" }}>
+                      {uni.name}
+                    </div>
+                    <div className="text-xs mt-0.5" style={{ color: "#737373" }}>
                       {uni.location}, {uni.country}
                     </div>
                   </div>
@@ -197,7 +197,7 @@ export function UniversityAutocompleteGlobal({
 
           {/* Loading State */}
           {loading && (
-            <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+            <div className="px-4 py-8 text-center text-sm" style={{ color: "#737373" }}>
               <div className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full mb-2" />
               <div>搜尋全球大學中...</div>
             </div>
@@ -205,9 +205,9 @@ export function UniversityAutocompleteGlobal({
 
           {/* No Results */}
           {!loading && !hasResults && query.length >= 2 && (
-            <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-              <div className="mb-2">😕 找不到「{query}」</div>
-              <div className="text-xs">
+            <div className="px-4 py-8 text-center text-sm" style={{ color: "#737373" }}>
+              <div className="mb-2">找不到「{query}」</div>
+              <div className="text-xs mt-2">
                 試試看：
                 <br />• 使用英文名稱
                 <br />• 檢查拼寫
@@ -218,7 +218,7 @@ export function UniversityAutocompleteGlobal({
 
           {/* Hint */}
           {query.length === 1 && (
-            <div className="px-4 py-4 text-center text-xs text-muted-foreground">
+            <div className="px-4 py-4 text-center text-xs" style={{ color: "#737373" }}>
               繼續輸入以搜尋全球大學...
             </div>
           )}

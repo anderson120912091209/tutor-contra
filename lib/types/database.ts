@@ -47,6 +47,20 @@ export interface AvailabilitySlot {
   updated_at: string;
 }
 
+export interface UniversityVerification {
+  id: string;
+  tutor_id: string;
+  university_id: string;
+  university_name: string;
+  verification_email: string;
+  verification_token: string;
+  token_expires_at: string;
+  verified: boolean;
+  verified_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface TutorProfile {
   id: string;
   user_id: string;
@@ -59,6 +73,9 @@ export interface TutorProfile {
   avatar_url: string | null;
   avatar_photo_url: string | null;
   public_slug: string;
+  high_school: string | null;
+  high_school_system: string | null;
+  high_school_system_other: string | null;
   education: Education[];
   social_links: SocialLinks;
   gallery_photos: GalleryPhoto[];
@@ -69,6 +86,8 @@ export interface TutorProfile {
   notion_calendar_enabled: boolean;
   notion_calendar_token: CalendarTokens | null;
   notion_database_id: string | null;
+  university_verified: boolean;
+  university_verified_at: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -33,7 +33,7 @@ export function PhotoGalleryDisplay({
   if (displayStyle === "carousel") {
     return (
       <div className="relative">
-        <div className="relative aspect-[16/9] rounded-lg overflow-hidden bg-gray-100">
+        <div className="relative aspect-[16/9] rounded-2xl overflow-hidden bg-gray-100 shadow-lg">
           {photos.map((photo, index) => (
             <div
               key={photo.id}
@@ -58,15 +58,15 @@ export function PhotoGalleryDisplay({
 
         {/* Navigation Dots */}
         {photos.length > 1 && (
-          <div className="flex justify-center gap-2 mt-4">
+          <div className="flex justify-center gap-2 mt-6">
             {photos.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentIndex(index)}
-                className={`w-2 h-2 rounded-full transition-all ${
+                className={`h-1.5 rounded-full transition-all ${
                   index === currentIndex
-                    ? "bg-primary w-8"
-                    : "bg-gray-300 hover:bg-gray-400"
+                    ? "w-8 bg-[#373737]"
+                    : "w-1.5 bg-gray-300 hover:bg-gray-400"
                 }`}
                 aria-label={`Go to photo ${index + 1}`}
               />
@@ -83,19 +83,25 @@ export function PhotoGalleryDisplay({
                   prev === 0 ? photos.length - 1 : prev - 1
                 )
               }
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center transition-colors"
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 hover:bg-white rounded-full flex items-center justify-center transition-all shadow-lg hover:shadow-xl hover:scale-110"
+              style={{ color: "#373737" }}
               aria-label="Previous photo"
             >
-              ←
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
             </button>
             <button
               onClick={() =>
                 setCurrentIndex((prev) => (prev + 1) % photos.length)
               }
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 hover:bg-white rounded-full flex items-center justify-center transition-all shadow-lg hover:shadow-xl hover:scale-110"
+              style={{ color: "#373737" }}
               aria-label="Next photo"
             >
-              →
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </button>
           </>
         )}
@@ -109,17 +115,17 @@ export function PhotoGalleryDisplay({
       {photos.map((photo) => (
         <div
           key={photo.id}
-          className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 group"
+          className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 group shadow-md hover:shadow-xl transition-all duration-300"
         >
           <Image
             src={photo.url}
             alt={photo.caption || "Gallery photo"}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover group-hover:scale-110 transition-transform duration-500"
           />
           {photo.caption && (
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all duration-300 flex items-end p-3">
-              <p className="text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+              <p className="text-white text-sm font-medium">
                 {photo.caption}
               </p>
             </div>

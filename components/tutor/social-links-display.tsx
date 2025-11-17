@@ -70,13 +70,12 @@ export function SocialLinksDisplay({ socialLinks }: SocialLinksDisplayProps) {
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className={`
-              p-2.5 rounded-full border-2 border-gray-200
-              bg-white text-gray-700
-              transition-all duration-200
-              ${platform.color} hover:text-white hover:border-transparent
-              hover:scale-110 hover:shadow-md
-            `}
+            className="p-2.5 rounded-full transition-all duration-200 hover:scale-110 hover:shadow-md"
+            style={{
+              backgroundColor: "rgba(243, 244, 246, 0.8)",
+              border: "1px solid rgba(55, 55, 55, 0.1)",
+              color: "#373737"
+            }}
             aria-label={platform.label}
             title={platform.label}
           >

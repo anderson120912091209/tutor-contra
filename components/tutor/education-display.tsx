@@ -4,16 +4,27 @@ import { UniversityCard } from "@/components/ui/university-card";
 
 interface EducationDisplayProps {
   education: Education[];
+  universityVerified?: boolean;
 }
 
-export function EducationDisplay({ education }: EducationDisplayProps) {
+export function EducationDisplay({ education, universityVerified = false }: EducationDisplayProps) {
   if (education.length === 0) return null;
 
   return (
     <section>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-3xl font-bold">學歷背景</h2>
-        <div className="text-sm text-muted-foreground">
+        <div className="flex items-center gap-3">
+          <h2 className="text-3xl font-bold">學歷背景</h2>
+          {universityVerified && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 border border-green-200" style={{ color: "#10b981" }}>
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span className="text-xs font-medium" style={{ color: "#059669" }}>已驗證</span>
+            </span>
+          )}
+        </div>
+        <div className="text-sm" style={{ color: "#737373" }}>
           {education.length} 項學歷
         </div>
       </div>

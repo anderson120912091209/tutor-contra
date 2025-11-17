@@ -71,7 +71,6 @@ export function ProfileEditorSplit({ profile: initialProfile }: ProfileEditorSpl
       
       if (user?.user_metadata?.avatar_url && !profile.avatar_photo_url) {
         setOauthAvatarAvailable(true);
-        // Auto-set OAuth avatar if no avatar is currently set
         setAvatarPhotoUrl(user.user_metadata.avatar_url);
       }
     };
@@ -79,17 +78,45 @@ export function ProfileEditorSplit({ profile: initialProfile }: ProfileEditorSpl
     checkOAuthAvatar();
   }, [profile.avatar_photo_url]);
 
+  // Refresh profile after verification callback
+  useEffect(() => {
+    const checkVerificationCallback = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const verification = urlParams.get("university_verification");
+      
+      if (verification === "success") {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          try {
+            const response = await fetch("/api/tutor/profile");
+            if (response.ok) {
+              const updatedProfile = await response.json();
+              setProfile(updatedProfile);
+            }
+          } catch (error) {
+            console.error("Error refreshing profile:", error);
+          }
+        }
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+    };
+
+    checkVerificationCallback();
+  }, []);
+
   // Handle welcome completion
   const handleWelcomeComplete = async (data: {
     fullName: string;
+    highSchool?: string;
+    highSchoolSystem?: "IB" | "AP" | "學測" | "高職" | "A-Levels" | "其他";
+    highSchoolSystemOther?: string;
     university: string;
     universityWebsite?: string;
     universityCountry?: string;
   }) => {
-    // Update display name
     setDisplayName(data.fullName);
 
-    // Add university to education
     const currentYear = new Date().getFullYear();
     const newEducation: Education = {
       university: data.university,
@@ -103,16 +130,17 @@ export function ProfileEditorSplit({ profile: initialProfile }: ProfileEditorSpl
     };
     setEducation([newEducation]);
 
-    // Close welcome and save initial data
     setShowWelcome(false);
 
-    // Auto-save the initial data
     try {
       await fetch("/api/tutor/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           display_name: data.fullName,
+          high_school: data.highSchool || null,
+          high_school_system: data.highSchoolSystem || null,
+          high_school_system_other: data.highSchoolSystem === "其他" ? data.highSchoolSystemOther : null,
           education: [newEducation],
         }),
       });
@@ -142,7 +170,6 @@ export function ProfileEditorSplit({ profile: initialProfile }: ProfileEditorSpl
     setMessage(null);
 
     try {
-      // Save profile
       const response = await fetch("/api/tutor/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -163,7 +190,6 @@ export function ProfileEditorSplit({ profile: initialProfile }: ProfileEditorSpl
 
       if (!response.ok) throw new Error("Failed to save profile");
 
-      // Save availability
       const availResponse = await fetch("/api/availability", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -180,7 +206,7 @@ export function ProfileEditorSplit({ profile: initialProfile }: ProfileEditorSpl
       if (response.ok && availResponse.ok) {
         const data = await response.json();
         setProfile(data.profile);
-        setMessage({ type: "success", text: "✓ 已儲存" });
+        setMessage({ type: "success", text: "已儲存" });
         setTimeout(() => setMessage(null), 3000);
       } else {
         setMessage({ type: "error", text: "儲存失敗" });
@@ -241,27 +267,31 @@ export function ProfileEditorSplit({ profile: initialProfile }: ProfileEditorSpl
     return "完善您的檔案";
   };
 
-  // Show welcome onboarding if first time
   if (showWelcome) {
     return <WelcomeOnboarding onComplete={handleWelcomeComplete} />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top Bar - Simple */}
-      <div className="bg-white border-b">
-        <div className="container mx-auto px-6 py-3">
+    <div className="min-h-screen bg-white">
+      {/* Minimal Top Bar */}
+      <div className="border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/tutor/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
-                ← 回儀表板
-              </Link>
-            </div>
+            <Link 
+              href="/tutor/dashboard" 
+              className="text-sm flex items-center gap-1.5 transition-colors hover:opacity-70"
+              style={{ color: "#737373" }}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              回儀表板
+            </Link>
             
             <div className="flex items-center gap-3">
               {message && (
                 <div
-                  className={`text-sm px-3 py-1.5 rounded-md ${
+                  className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
                     message.type === "success"
                       ? "bg-green-50 text-green-700"
                       : "bg-red-50 text-red-700"
@@ -272,9 +302,15 @@ export function ProfileEditorSplit({ profile: initialProfile }: ProfileEditorSpl
               )}
               
               <Link href={`/t/${profile.public_slug}`} target="_blank">
-                <Button variant="ghost" size="sm" className="text-muted-foreground">
+                <button
+                  className="text-xs px-3 py-1.5 rounded-lg transition-all hover:opacity-70"
+                  style={{ 
+                    color: "#737373",
+                    backgroundColor: "#f3f4f6"
+                  }}
+                >
                   查看公開頁
-                </Button>
+                </button>
               </Link>
             </div>
           </div>
@@ -282,240 +318,264 @@ export function ProfileEditorSplit({ profile: initialProfile }: ProfileEditorSpl
       </div>
 
       {/* Split View */}
-      <div className="flex h-[calc(100vh-65px)]">
+      <div className="flex h-[calc(100vh-73px)]">
         {/* Left Panel - Form */}
-        <div className="w-1/2 border-r bg-white flex flex-col relative">
+        <div className="w-1/2 border-r border-gray-100 bg-white flex flex-col relative overflow-hidden">
           <div className="flex-1 overflow-y-auto">
-            <div className="p-8 max-w-2xl mx-auto pb-40">
-            {/* Progress Section - Inside Left Panel */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <span className="inline-flex items-center justify-center px-3 py-1 bg-red-100 text-red-600 rounded text-sm font-bold">
-                    {completionPercentage()}%
-                  </span>
-                  <span className="ml-3 text-gray-600">完整度</span>
+            <div className="max-w-xl mx-auto px-8 py-10 pb-32">
+              {/* Progress Section - Subtle */}
+              <div className="mb-10">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium" style={{ color: "#373737" }}>
+                      步驟 {currentStep} / {STEPS.length}
+                    </span>
+                    <span className="text-xs" style={{ color: "#737373" }}>
+                      {completionPercentage()}% 完整
+                    </span>
+                  </div>
+                  {completionPercentage() < 100 && (
+                    <span className="text-xs" style={{ color: "#737373" }}>
+                      {getNextStepSuggestion()}
+                    </span>
+                  )}
                 </div>
-                {completionPercentage() < 100 && (
-                  <span className="text-sm text-green-600 font-medium">
-                    +{100 - completionPercentage()}% {getNextStepSuggestion()}
-                  </span>
-                )}
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-1.5">
-                <div
-                  className="bg-red-500 h-1.5 rounded-full transition-all duration-300"
-                  style={{ width: `${completionPercentage()}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Step Title */}
-            <div className="mb-8">
-              <h1 className="text-2xl font-bold mb-2">{STEPS[currentStep - 1].name}</h1>
-              <p className="text-gray-500 text-sm">
-                {STEPS[currentStep - 1].description}
-              </p>
-            </div>
-
-            {/* Step 1: Basic Information */}
-            {currentStep === 1 && (
-              <section className="space-y-6">
-                <div>
-                  <Label htmlFor="displayName" className="text-gray-700">
-                    顯示名稱
-                  </Label>
-                  <Input
-                    id="displayName"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    placeholder="例如：陳老師"
-                    className="mt-2"
+                <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-300"
+                    style={{ 
+                      width: `${completionPercentage()}%`,
+                      backgroundColor: "#373737"
+                    }}
                   />
                 </div>
+              </div>
 
-                <div>
-                  <Label htmlFor="bio" className="text-gray-700">
-                    自我介紹
-                  </Label>
-                  <textarea
-                    id="bio"
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    rows={12}
-                    className="mt-2 flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    placeholder="簡單介紹您的教學理念、風格或特色...
+              {/* Step Title */}
+              <div className="mb-10">
+                <h1 className="text-2xl font-semibold mb-2" style={{ color: "#373737" }}>
+                  {STEPS[currentStep - 1].name}
+                </h1>
+                <p className="text-sm" style={{ color: "#737373" }}>
+                  {STEPS[currentStep - 1].description}
+                </p>
+              </div>
+
+              {/* Step 1: Basic Information */}
+              {currentStep === 1 && (
+                <section className="space-y-8">
+                  <div className="space-y-3">
+                    <Label htmlFor="displayName" className="text-sm font-medium block" style={{ color: "#373737" }}>
+                      顯示名稱
+                    </Label>
+                    <Input
+                      id="displayName"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      placeholder="例如：陳老師"
+                      className="w-full text-base py-4 px-4 bg-gray-50 border-0 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#373737]/20 transition-all placeholder:text-gray-400"
+                      style={{ color: "#373737" }}
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label htmlFor="bio" className="text-sm font-medium block" style={{ color: "#373737" }}>
+                      自我介紹
+                    </Label>
+                    <textarea
+                      id="bio"
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      rows={10}
+                      className="w-full text-base py-4 px-4 bg-gray-50 border-0 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#373737]/20 transition-all placeholder:text-gray-400 resize-none"
+                      style={{ color: "#373737" }}
+                      placeholder="簡單介紹您的教學理念、風格或特色...
 
 例如：
 • 您的教學經驗
 • 您的教學方法
 • 您的教學特色
 • 您擅長幫助什麼樣的學生"
-                  />
-                  <p className="text-xs text-muted-foreground mt-2">
-                    建議至少 200 字，讓家長更了解您的教學風格
-                  </p>
-                </div>
-              </section>
-            )}
+                    />
+                    <p className="text-xs" style={{ color: "#737373" }}>
+                      建議至少 200 字，讓家長更了解您的教學風格
+                    </p>
+                  </div>
+                </section>
+              )}
 
-            {/* Step 2: Teaching Information */}
-            {currentStep === 2 && (
-              <section className="space-y-6">
-                <div>
-                  <Label className="text-gray-700">教學科目</Label>
-                  <div className="mt-2">
-                    <SubjectSelectorCompact
-                      selected={subjects}
-                      onChange={setSubjects}
+              {/* Step 2: Teaching Information */}
+              {currentStep === 2 && (
+                <section className="space-y-8">
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium block" style={{ color: "#373737" }}>
+                      教學科目
+                    </Label>
+                    <div className="bg-gray-50 rounded-xl p-4">
+                      <SubjectSelectorCompact
+                        selected={subjects}
+                        onChange={setSubjects}
+                      />
+                    </div>
+                    <p className="text-xs" style={{ color: "#737373" }}>
+                      請至少選擇一個教學科目
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label htmlFor="location" className="text-sm font-medium block" style={{ color: "#373737" }}>
+                      教學地點
+                    </Label>
+                    <Input
+                      id="location"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      placeholder="例如：台北市大安區"
+                      className="w-full text-base py-4 px-4 bg-gray-50 border-0 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#373737]/20 transition-all placeholder:text-gray-400"
+                      style={{ color: "#373737" }}
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    請至少選擇一個教學科目
-                  </p>
-                </div>
 
-                <div>
-                  <Label htmlFor="location" className="text-gray-700">
-                    教學地點
-                  </Label>
-                  <Input
-                    id="location"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    placeholder="例如：台北市大安區"
-                    className="mt-2"
-                  />
-                </div>
+                  <div className="space-y-3">
+                    <Label htmlFor="yearsExperience" className="text-sm font-medium block" style={{ color: "#373737" }}>
+                      教學年資
+                    </Label>
+                    <Input
+                      id="yearsExperience"
+                      type="number"
+                      min="0"
+                      value={yearsExperience}
+                      onChange={(e) => setYearsExperience(e.target.value)}
+                      placeholder="例如：5"
+                      className="w-full text-base py-4 px-4 bg-gray-50 border-0 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#373737]/20 transition-all placeholder:text-gray-400"
+                      style={{ color: "#373737" }}
+                    />
+                    <p className="text-xs" style={{ color: "#737373" }}>
+                      您有多少年的教學經驗
+                    </p>
+                  </div>
 
-                <div>
-                  <Label htmlFor="yearsExperience" className="text-gray-700">
-                    教學年資
-                  </Label>
-                  <Input
-                    id="yearsExperience"
-                    type="number"
-                    min="0"
-                    value={yearsExperience}
-                    onChange={(e) => setYearsExperience(e.target.value)}
-                    placeholder="例如：5"
-                    className="mt-2"
-                  />
-                  <p className="text-xs text-muted-foreground mt-2">
-                    您有多少年的教學經驗
-                  </p>
-                </div>
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-gray-50 transition-all hover:bg-gray-100/50 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      id="teachesOnline"
+                      checked={teachesOnline}
+                      onChange={(e) => setTeachesOnline(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 rounded border-gray-300 text-[#373737] focus:ring-2 focus:ring-[#373737]/20 cursor-pointer"
+                    />
+                    <label htmlFor="teachesOnline" className="flex-1 cursor-pointer">
+                      <div className="text-sm font-medium mb-0.5" style={{ color: "#373737" }}>
+                        提供線上教學
+                      </div>
+                      <div className="text-xs" style={{ color: "#737373" }}>
+                        透過視訊進行遠距教學
+                      </div>
+                    </label>
+                  </div>
+                </section>
+              )}
 
-                <div className="flex items-center gap-3 p-4 border rounded-lg bg-gray-50">
-                  <input
-                    type="checkbox"
-                    id="teachesOnline"
-                    checked={teachesOnline}
-                    onChange={(e) => setTeachesOnline(e.target.checked)}
-                    className="rounded w-4 h-4"
+              {/* Step 3: Education */}
+              {currentStep === 3 && (
+                <section>
+                  <EducationEditor education={education} onChange={setEducation} />
+                </section>
+              )}
+
+              {/* Step 4: Photos */}
+              {currentStep === 4 && (
+                <section>
+                  <PhotoManager
+                    userId={profile.user_id}
+                    avatarUrl={avatarPhotoUrl}
+                    galleryPhotos={galleryPhotos}
+                    displayStyle={galleryDisplayStyle}
+                    onAvatarChange={setAvatarPhotoUrl}
+                    onGalleryChange={setGalleryPhotos}
+                    onDisplayStyleChange={setGalleryDisplayStyle}
                   />
-                  <label htmlFor="teachesOnline" className="text-sm cursor-pointer flex-1">
-                    <div className="font-medium">提供線上教學</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">
-                      透過視訊進行遠距教學
+                </section>
+              )}
+
+              {/* Step 5: Availability & Calendar */}
+              {currentStep === 5 && (
+                <section className="space-y-8">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-6" style={{ color: "#373737" }}>
+                      可用時間設定
+                    </h3>
+                    <div className="bg-gray-50 rounded-xl p-6">
+                      <AvailabilityCalendar
+                        tutorId={profile.id}
+                        availability={availability}
+                        onChange={setAvailability}
+                      />
                     </div>
-                  </label>
-                </div>
-              </section>
-            )}
+                  </div>
 
-            {/* Step 3: Education */}
-            {currentStep === 3 && (
-              <section>
-                <EducationEditor education={education} onChange={setEducation} />
-              </section>
-            )}
+                  <div className="pt-8 border-t border-gray-100">
+                    <h3 className="text-lg font-semibold mb-6" style={{ color: "#373737" }}>
+                      日曆整合
+                    </h3>
+                    <div className="bg-gray-50 rounded-xl p-6">
+                      <CalendarIntegrations
+                        googleCalendarEnabled={profile.google_calendar_enabled}
+                        notionCalendarEnabled={profile.notion_calendar_enabled}
+                        onGoogleConnect={() => {
+                          window.location.href = "/api/calendar/google/connect";
+                        }}
+                        onGoogleDisconnect={async () => {
+                          alert("中斷連結功能即將推出");
+                        }}
+                        onNotionConnect={() => {
+                          window.location.href = "/api/calendar/notion/connect";
+                        }}
+                        onNotionDisconnect={async () => {
+                          alert("中斷連結功能即將推出");
+                        }}
+                      />
+                    </div>
+                  </div>
+                </section>
+              )}
 
-            {/* Step 4: Photos */}
-            {currentStep === 4 && (
-              <section>
-                <PhotoManager
-                  userId={profile.user_id}
-                  avatarUrl={avatarPhotoUrl}
-                  galleryPhotos={galleryPhotos}
-                  displayStyle={galleryDisplayStyle}
-                  onAvatarChange={setAvatarPhotoUrl}
-                  onGalleryChange={setGalleryPhotos}
-                  onDisplayStyleChange={setGalleryDisplayStyle}
-                />
-              </section>
-            )}
-
-            {/* Step 5: Availability & Calendar */}
-            {currentStep === 5 && (
-              <section className="space-y-8">
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">可用時間設定</h3>
-                  <AvailabilityCalendar
-                    tutorId={profile.id}
-                    availability={availability}
-                    onChange={setAvailability}
-                  />
-                </div>
-
-                <div className="pt-6 border-t">
-                  <h3 className="text-lg font-semibold mb-4">日曆整合</h3>
-                  <CalendarIntegrations
-                    googleCalendarEnabled={profile.google_calendar_enabled}
-                    notionCalendarEnabled={profile.notion_calendar_enabled}
-                    onGoogleConnect={() => {
-                      window.location.href = "/api/calendar/google/connect";
-                    }}
-                    onGoogleDisconnect={async () => {
-                      // TODO: Implement disconnect
-                      alert("中斷連結功能即將推出");
-                    }}
-                    onNotionConnect={() => {
-                      window.location.href = "/api/calendar/notion/connect";
-                    }}
-                    onNotionDisconnect={async () => {
-                      // TODO: Implement disconnect
-                      alert("中斷連結功能即將推出");
-                    }}
-                  />
-                </div>
-              </section>
-            )}
-
-            {/* Step 6: Social Links */}
-            {currentStep === 6 && (
-              <section>
-                <SocialLinksEditor socialLinks={socialLinks} onChange={setSocialLinks} />
-              </section>
-            )}
+              {/* Step 6: Social Links */}
+              {currentStep === 6 && (
+                <section>
+                  <SocialLinksEditor socialLinks={socialLinks} onChange={setSocialLinks} />
+                </section>
+              )}
             </div>
           </div>
 
           {/* Bottom Navigation - Fixed Footer */}
-          <div className="absolute bottom-0 left-0 right-0 bg-white border-t shadow-lg z-20">
-            <div className="max-w-2xl mx-auto px-8 py-5">
-              <div className="flex items-center justify-between mb-4">
-                <Button
-                  variant="outline"
+          <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-100 z-20">
+            <div className="max-w-xl mx-auto px-8 py-5">
+              <div className="flex items-center justify-between mb-3">
+                <button
                   onClick={handleBack}
                   disabled={currentStep === 1}
-                  className="px-8"
+                  className="px-6 py-2.5 text-sm rounded-xl transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                  style={{ 
+                    color: currentStep === 1 ? "#d1d5db" : "#373737",
+                    backgroundColor: currentStep === 1 ? "transparent" : "#f3f4f6"
+                  }}
                 >
                   上一步
-                </Button>
+                </button>
 
                 {/* Page Indicators */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   {STEPS.map((step) => (
                     <button
                       key={step.id}
                       onClick={() => setCurrentStep(step.id)}
-                      className={`w-2 h-2 rounded-full transition-all ${
+                      className={`h-1.5 rounded-full transition-all ${
                         currentStep === step.id
-                          ? "bg-primary w-8"
+                          ? "w-8 bg-[#373737]"
                           : currentStep > step.id
-                          ? "bg-primary/60"
-                          : "bg-gray-300"
+                          ? "w-1.5 bg-[#373737]/40"
+                          : "w-1.5 bg-gray-200"
                       }`}
                       aria-label={`跳到${step.name}`}
                     />
@@ -523,40 +583,46 @@ export function ProfileEditorSplit({ profile: initialProfile }: ProfileEditorSpl
                 </div>
 
                 {currentStep < STEPS.length ? (
-                  <Button
+                  <button
                     onClick={handleNext}
                     disabled={!canGoNext()}
-                    className="px-8 bg-blue-600 hover:bg-blue-700"
+                    className="px-6 py-2.5 text-sm font-medium rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                    style={{ 
+                      color: canGoNext() ? "white" : "#d1d5db",
+                      backgroundColor: canGoNext() ? "#373737" : "#f3f4f6"
+                    }}
                   >
                     下一步
-                  </Button>
+                  </button>
                 ) : (
-                  <Button
+                  <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="px-8 bg-blue-600 hover:bg-blue-700"
+                    className="px-6 py-2.5 text-sm font-medium rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                    style={{ 
+                      color: saving ? "#d1d5db" : "white",
+                      backgroundColor: saving ? "#f3f4f6" : "#373737"
+                    }}
                   >
                     {saving ? "儲存中..." : "完成"}
-                  </Button>
+                  </button>
                 )}
-              </div>
-
-              {/* Current Step Indicator */}
-              <div className="text-center text-xs text-muted-foreground">
-                {currentStep} / {STEPS.length}
               </div>
             </div>
           </div>
         </div>
 
         {/* Right Panel - Preview */}
-        <div className="w-1/2 overflow-y-auto bg-gray-50">
-          <div className="p-8">
-            <div className="mb-4">
-              <div className="text-sm font-medium text-gray-500">即時預覽</div>
+        <div className="w-1/2 overflow-y-auto bg-gray-50/50">
+          <div className="sticky top-0 p-8">
+            <div className="mb-6">
+              <div className="text-xs font-medium mb-1" style={{ color: "#737373" }}>
+                即時預覽
+              </div>
+              <div className="h-px bg-gray-100" />
             </div>
             
-            <div className="bg-white rounded-lg shadow-sm border">
+            <div className="bg-white/80 backdrop-blur-md rounded-xl border border-gray-200/50 shadow-sm">
               <ProfilePreview profile={previewProfile} />
             </div>
           </div>

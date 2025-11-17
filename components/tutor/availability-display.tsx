@@ -34,26 +34,30 @@ export function AvailabilityDisplay({ availability }: AvailabilityDisplayProps) 
       {DAYS.map((day) => {
         const daySlots = getDaySlots(day.id);
         return (
-          <div key={day.id} className="border rounded-lg p-3">
-            <div className="text-center font-semibold text-sm mb-3 pb-2 border-b">
+          <div key={day.id} className="rounded-xl p-4 bg-gray-50 border border-gray-100">
+            <div className="text-center font-medium text-sm mb-3 pb-2 border-b border-gray-200" style={{ color: "#373737" }}>
               {day.name}
             </div>
             <div className="space-y-2">
               {daySlots.length === 0 ? (
-                <div className="text-xs text-center text-muted-foreground py-4">
+                <div className="text-xs text-center py-4" style={{ color: "#d1d5db" }}>
                   休息
                 </div>
               ) : (
                 daySlots.map((slot) => (
                   <div
                     key={slot.id}
-                    className="bg-green-50 border border-green-200 rounded-md p-2 text-xs text-center"
+                    className="rounded-lg p-2.5 text-xs text-center shadow-sm"
+                    style={{
+                      backgroundColor: "rgba(147, 197, 253, 0.12)",
+                      border: "1px solid rgba(147, 197, 253, 0.2)"
+                    }}
                   >
-                    <div className="font-medium text-green-700">
+                    <div className="font-medium" style={{ color: "#373737" }}>
                       {slot.start_time.slice(0, 5)}
                     </div>
-                    <div className="text-green-600">-</div>
-                    <div className="font-medium text-green-700">
+                    <div className="text-xs" style={{ color: "#737373" }}>-</div>
+                    <div className="font-medium" style={{ color: "#373737" }}>
                       {slot.end_time.slice(0, 5)}
                     </div>
                   </div>
