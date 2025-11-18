@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface HeatmapData {
   [date: string]: number;
@@ -49,41 +50,27 @@ export function TeachingHeatmap({ data, year = new Date().getFullYear() }: Teach
   }
 
   const getIntensity = (count: number) => {
-    if (count === 0) return "bg-muted";
-    if (count === 1) return "bg-green-200";
-    if (count === 2) return "bg-green-400";
-    if (count >= 3) return "bg-green-600";
-    return "bg-muted";
+    if (count === 0) return "bg-stone-100";
+    if (count === 1) return "bg-stone-300";
+    if (count === 2) return "bg-stone-400";
+    if (count >= 3) return "bg-stone-600";
+    return "bg-stone-100";
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString("zh-TW", {
-      month: "long",
+    return date.toLocaleDateString("en-US", {
+      month: "short",
       day: "numeric",
     });
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">{year} 年教學記錄</h3>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>少</span>
-          <div className="flex gap-1">
-            <div className="w-3 h-3 bg-muted rounded-sm" />
-            <div className="w-3 h-3 bg-green-200 rounded-sm" />
-            <div className="w-3 h-3 bg-green-400 rounded-sm" />
-            <div className="w-3 h-3 bg-green-600 rounded-sm" />
-          </div>
-          <span>多</span>
-        </div>
-      </div>
-
-      <div className="overflow-x-auto">
+    <div className="space-y-2">
+      <div className="overflow-x-auto scrollbar-none">
         <div className="inline-block min-w-full">
-          <div className="flex gap-1">
+          <div className="flex gap-[3px]">
             {weeks.map((week, weekIndex) => (
-              <div key={weekIndex} className="flex flex-col gap-1">
+              <div key={weekIndex} className="flex flex-col gap-[3px]">
                 {week.map((date, dayIndex) => {
                   const dateStr = date.toISOString().split("T")[0];
                   const count = data[dateStr] || 0;
@@ -92,12 +79,13 @@ export function TeachingHeatmap({ data, year = new Date().getFullYear() }: Teach
                   return (
                     <div
                       key={dayIndex}
-                      className={`w-3 h-3 rounded-sm cursor-pointer transition-all hover:ring-2 hover:ring-primary ${
-                        isCurrentYear ? getIntensity(count) : "bg-background"
-                      }`}
+                      className={cn(
+                        "w-2.5 h-2.5 rounded-[1px] transition-colors",
+                        isCurrentYear ? getIntensity(count) : "bg-transparent"
+                      )}
                       onMouseEnter={() => setHoveredDate(dateStr)}
                       onMouseLeave={() => setHoveredDate(null)}
-                      title={`${formatDate(date)}: ${count} 堂課`}
+                      title={`${formatDate(date)}: ${count} lessons`}
                     />
                   );
                 })}
@@ -106,14 +94,6 @@ export function TeachingHeatmap({ data, year = new Date().getFullYear() }: Teach
           </div>
         </div>
       </div>
-
-      {hoveredDate && data[hoveredDate] > 0 && (
-        <div className="text-sm text-muted-foreground">
-          {formatDate(new Date(hoveredDate))}: {data[hoveredDate]} 堂已驗證課程
-        </div>
-      )}
     </div>
   );
 }
-
-

@@ -22,16 +22,21 @@ export async function GET(request: Request) {
           .eq("user_id", user.id)
           .single();
 
-        // Check for parent profile
+        // Check for parent profile with onboarding status
         const { data: parentProfile } = await supabase
           .from("parent_profiles")
-          .select("id")
+          .select("id, onboarding_completed")
           .eq("user_id", user.id)
           .single();
 
         // If no profile exists, redirect to role selection
         if (!tutorProfile && !parentProfile) {
           return NextResponse.redirect(`${origin}/auth/select-role`);
+        }
+
+        // If parent profile exists but onboarding not completed, force onboarding
+        if (parentProfile && !parentProfile.onboarding_completed) {
+          return NextResponse.redirect(`${origin}/auth/setup-parent`);
         }
       }
 
@@ -42,5 +47,3 @@ export async function GET(request: Request) {
   // Return the user to an error page with instructions
   return NextResponse.redirect(`${origin}/auth/auth-code-error`);
 }
-
-

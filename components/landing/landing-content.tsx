@@ -5,6 +5,7 @@ import { TutorCard } from "./tutor-card";
 import { TutorModal } from "./tutor-modal";
 import { AiChatAdvanced } from "./ai-chat-advanced";
 import { SidebarProfile } from "./sidebar-profile";
+import { LandingIntro } from "./landing-intro";
 import Link from "next/link";
 import Image from "next/image";
 import type { User } from "@supabase/supabase-js";
@@ -18,9 +19,21 @@ interface LandingContentProps {
 
 export function LandingContent({ initialTutors, user, userRole, profileData }: LandingContentProps) {
   const [selectedTutor, setSelectedTutor] = useState<any>(null);
+  const [showContent, setShowContent] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <>
+      {/* Intro Animation */}
+      <LandingIntro onComplete={() => setShowContent(true)} />
+      
+      {/* Main Content */}
+      <div 
+        className="min-h-screen bg-gray-50 flex"
+        style={{
+          opacity: showContent ? 1 : 0,
+          transition: "opacity 0.6s ease-out"
+        }}
+      >
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r fixed left-0 top-0 h-full overflow-y-auto">
         <div className="p-6">
@@ -173,7 +186,8 @@ export function LandingContent({ initialTutors, user, userRole, profileData }: L
         open={!!selectedTutor}
         onClose={() => setSelectedTutor(null)}
       />
-    </div>
+      </div>
+    </>
   );
 }
 

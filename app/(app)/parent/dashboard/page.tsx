@@ -22,6 +22,11 @@ export default async function ParentDashboardPage() {
     redirect("/auth/setup-parent");
   }
 
+  // Enforce onboarding completion
+  if (!parentProfile.onboarding_completed) {
+    redirect("/auth/setup-parent");
+  }
+
   const [pendingConfirmations, lessonHistory] = await Promise.all([
     getPendingConfirmations(parentProfile.id),
     getParentLessonHistory(parentProfile.id),
@@ -65,4 +70,3 @@ export default async function ParentDashboardPage() {
     </div>
   );
 }
-

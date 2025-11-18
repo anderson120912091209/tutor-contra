@@ -61,6 +61,17 @@ export interface UniversityVerification {
   updated_at: string;
 }
 
+export type ProfileBlockType = 'text' | 'image' | 'video' | 'code' | 'callout';
+
+export interface ProfileBlock {
+  id: string;
+  type: ProfileBlockType;
+  content: string;
+  metadata?: Record<string, any>;
+}
+
+export type ProfileVisibility = 'public' | 'restricted' | 'private';
+
 export interface TutorProfile {
   id: string;
   user_id: string;
@@ -73,6 +84,7 @@ export interface TutorProfile {
   avatar_url: string | null;
   avatar_photo_url: string | null;
   public_slug: string;
+  visibility: ProfileVisibility;
   high_school: string | null;
   high_school_system: string | null;
   high_school_system_other: string | null;
@@ -80,6 +92,7 @@ export interface TutorProfile {
   social_links: SocialLinks;
   gallery_photos: GalleryPhoto[];
   gallery_display_style: GalleryDisplayStyle;
+  profile_blocks: ProfileBlock[];
   google_calendar_enabled: boolean;
   google_calendar_token: CalendarTokens | null;
   google_calendar_id: string | null;
@@ -97,6 +110,7 @@ export interface ParentProfile {
   user_id: string;
   name: string;
   phone: string | null;
+  onboarding_completed: boolean;
   created_at: string;
   updated_at: string;
 }

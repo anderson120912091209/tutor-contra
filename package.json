@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@craftjs/core": "^0.2.12",
     "@hookform/resolvers": "^5.2.2",
     "@lottiefiles/dotlottie-react": "^0.17.7",
     "@notionhq/client": "^2.2.15",
